@@ -1,0 +1,1239 @@
+openapi: 3.0.0
+info:
+  version: 1.0.1
+  title: Upbase Foods Backend API documentation
+  description: Upbase Foods API endpoints.
+servers:
+  - url: 'https://upbase-foods-backend.netlify.app/.netlify/functions/api/'
+    description: production server
+  - url: "http://localhost:8000/api/v1"
+    description: Local server (uses test data)
+
+components:
+  errors:
+    properties:
+      internalServerError:
+        description: Something went wrong, please try again or check back for a fix
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+                - error
+                - data
+              properties:
+                status:
+                  type: string
+                error:
+                  type: string
+                data:
+                  type: array
+      customError:
+        application/json:
+          schema:
+            type: object
+            required:
+              - status
+              - message
+              - data
+            properties:
+              status:
+                type: string
+              message:
+                type: string
+              data:
+                type: array
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      required:
+        - first_name
+        - last_name
+        - email
+        - password
+        - user_id
+        - phone_number
+      properties:
+        first_name:
+          type: String
+          example: John
+        last_name:
+          type: String
+          example: Doe
+        email:
+          type: String
+          example: testUsername@gmail.com
+        role:
+          type: String
+          example: USER
+        password:
+          type: String
+          example: AveryStrongPassword
+        verified:
+          type: Boolean
+          example: false
+        user_id:
+          type: String
+          example: a unique uid
+        referer:
+          type: String
+          example: upbase admin
+        profile:
+          type: String
+          $ref: '#/components/schemas/Profile'
+        phone_number:
+          type: String
+          example: 09070822819
+        baskets:
+          type: Array
+          items:
+            $ref: '#/components/schemas/Order'
+    Organisation:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: Upbase Banking Plc
+        users:
+          type: array
+          $ref: "#/components/schemas/User"
+    Driver:
+      type: object
+      required:
+        - first_name
+        - last_name
+        - email
+        - password
+        - user_id
+        - phone_number
+        - next_of_kin
+        - vehicle_number
+      properties:
+        first_name:
+          type: String
+          example: John
+        last_name:
+          type: String
+          example: Doe
+        email:
+          type: String
+          example: testUsername@gmail.com
+        role:
+          type: String
+          example: DRIVER
+        password:
+          type: String
+          example: AveryStrongPassword
+        verified:
+          type: Boolean
+          example: false
+        user_id:
+          type: String
+          example: a unique uid
+        address:
+          type: String
+          format: city, street and houseNumber
+        next_of_kin:
+          type: object
+          properties: 
+            name:
+              type: String
+              example: Doe
+            relationship:
+              type: String
+              example: Brother
+            phone_number:
+              type: Number
+              example: 0805645666388
+        phone_number:
+          type: String
+          example: 09070822819
+        vehicle_number:
+          type: String
+          format: unique
+        application_status:
+          type: String
+          example: checked
+    Order:
+      type: object
+      required:
+        - user
+        - meal
+        - delivery_location
+        - delivery_time
+      properties:
+        user:
+          type: object
+          $ref: "#/components/schemas/User"
+        meal:
+          type: array
+          $ref: "#/components/schemas/Meal"
+        delivery_location:
+          type: string
+          example: Ikeja Street
+        delivery_time:
+          type: string
+          example: 09/09/1980
+        status:
+          type: string
+          format: pending or complete
+        price_cost: 
+          type: number 
+    Wallet:
+      type: object
+      required:
+        - companyId
+        - userId
+        - amount
+      properties:
+        companyId:
+          type: String
+          format: unique 
+        userId:
+          type: object
+          $ref: "#/components/schemas/User"
+        amount:
+          type: Number
+          format: 500
+    Menu:
+      type: object
+      required:
+        - category
+        - mealId
+      properties:
+        category:
+          type: String
+          example: Breakfast
+        mealId:
+          type: object
+          $ref: "#/components/schemas/Meal"
+    Meal:
+      type: object
+      required:
+        - tag
+        - mealname
+        - description
+        - price
+        - option_one
+        - option_two
+        - units_available
+        - image_url_one
+        - category
+      properties:
+        category:
+          type: String
+          example: Breakfast
+        tag:
+          type: String
+        mealname:
+          type: String
+          example: Rice and Chicken
+        description: 
+          type: String
+          example: a delicious meal
+        price:
+          type: number
+          example: 500
+        units_available:
+          type: number
+          example: 10
+        option_two: 
+          type: String
+        option_two:
+          type: String
+          example: any option_two
+        image_url_one:
+          type: String
+          format: an image
+    Coupon:
+      type: object
+      required:
+        - type
+        - code
+        - owner
+        - discount_value
+      properties:
+        type:
+          type: String
+        code:
+          type: string
+          format: a unique code
+        owner:
+          type: String
+          example: ridwan
+        discount_value:
+          type: String
+          example: 500
+  responses:
+    SuccessResponse:
+      application/json:
+        schema:
+          type: object
+          required:
+            - status
+            - message
+            - data
+          properties:
+            status:
+              type: string
+            message:
+              type: string
+            data:
+              type: object
+  parameters:
+    bearerToken:
+      in: path
+      name: Bearer Token
+      description: Authentication token 
+      required: true
+      schema:
+        type: string
+    tokenParams:
+      in: path
+      name: token
+      description: Auth Token
+      required: true
+      schema:
+        type: string
+    userId:
+      in: path
+      name: userId
+      description: User unique ID
+      required: true
+      schema:
+        type: string
+    mealId:
+      in: path
+      name: mealId
+      description: Meal unique ID
+      required: true
+      schema:
+        type: string
+paths:
+  /api/v1/auth/register:
+    post:
+      summary: Register User
+      description: Adds user to the users collection
+      tags:
+        - Users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - last_name
+                - first_name
+                - email
+                - password
+                - phone_number
+              properties:
+                first_name:
+                  type: String
+                  example: John
+                last_name:
+                  type: String
+                  example: Doe
+                email:
+                  type: String
+                  example: johndoe@example.com
+                role:
+                  type: String
+                  example: USER
+                password:
+                  type: String
+                  example: AveryStrongPassword
+      responses:
+        201:
+          description: Account registration was successful. Please check your mail to verify your account
+        409:
+          description: User already exists
+        500:
+          description: Something went wrong, please try again or check back for a fix
+  
+  /api/v1/admin/auth/register:
+    post:
+      summary: Register Admin
+      description: Adds admin to the users collection
+      tags:
+        - Admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - last_name
+                - first_name
+                - email
+                - password
+                - phone_number
+              properties:
+                first_name:
+                  type: String
+                  example: John
+                last_name:
+                  type: String
+                  example: Doe
+                email:
+                  type: String
+                  example: johndoe@example.com
+                role:
+                  type: String
+                  example: ADMIN
+                password:
+                  type: String
+                  example: AveryStrongPassword
+      responses:
+        201:
+          description: Account registration was successful. Please check your mail to verify your account
+        409:
+          description: User already exists
+        500:
+          description: Something went wrong, please try again or check back for a fix
+  
+  /api/v1/driver/auth/register:
+    post:
+      summary: Register Driver
+      description: Driver registers and wait for review
+      tags:
+        - Driver
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - first_name
+                - last_name
+                - email
+                - password
+                - user_id
+                - phone_number
+                - next_of_kin
+                - vehicle_number
+              properties:
+                first_name:
+                  type: String
+                  example: John
+                last_name:
+                  type: String
+                  example: Doe
+                email:
+                  type: String
+                  example: testUsername@gmail.com
+                password:
+                  type: String
+                  example: AveryStrongPassword
+                city:
+                  type: String
+                  format: Port Harcourt
+                street:
+                  type: String
+                  format: Rumuomasi
+                houseNumber:
+                  type: String
+                  format: No. 24
+                nextOfKinName:
+                  type: String
+                  example: Doe
+                nextOfKinRel:
+                  type: String
+                  example: Brother
+                nextOfKinPhoneNumber:
+                  type: Number
+                  example: 0805645666388
+                phone_number:
+                  type: String
+                  example: 09070822819
+                vehicle_number:
+                  type: String
+                  format: unique
+      responses:
+        201:
+          description: Account application was successful. Check Mail for more Information."
+        409:
+          description: Email already exists
+        500:
+          description: Something went wrong, please try again or check back for a fix
+  
+  /api/v1/auth/verify:
+    patch:
+      summary: Verify account
+      tags:
+        - Users
+      parameters:
+        - in: query
+          name: token
+          description: The token generated for verification with payload
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: User account has been verified successfully. You can login.
+        412:
+          description: This account has already been verified.
+        404:
+          description: Invalid verification link
+        500:
+          description: Something went wrong, please try again or check back for a fix
+
+  /api/v1/admin/auth/verify:
+    patch:
+      summary: Verify admin account
+      tags:
+        - Admin
+      parameters:
+        - in: query
+          name: token
+          description: The token generated for verification with payload
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: User account has been verified successfully. You can login.
+        412:
+          description: This account has already been verified.
+        404:
+          description: Invalid verification link
+        500:
+          description: Something went wrong, please try again or check back for a fix
+
+  /api/v1/auth/resend-verification:
+    post:
+      summary: Request for verification link
+      description: resends verification link to users upon link expiration
+      tags:
+        - Users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: String
+                  example: testUsername@gmail.com
+      responses:
+        200:
+          description: Please check your mail to verify your account
+        401:
+          description: Your account has been verified already.
+        404:
+          description: User doesn't exist. Ensure you enter the right credentials'
+        500:
+          description: Something went wrong, please try again or check back for a fix
+  
+  /api/v1/auth/login:
+    post:
+      summary: Login Users
+      description: authenticate users into the system
+      tags:
+        - Users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: String
+                  example: testUsername@gmail.com
+                password:
+                  type: String
+                  example: AveryStrongPassword
+      responses:
+        200:
+          description: User signed in successfully
+        401:
+          description: You have to verify your account
+        403:
+          description: Ensure you enter the right credentials
+        404:
+          description: Ensure you enter the right credentials'
+        500:
+          description: Something went wrong, please try again or check back for a fix
+
+  /api/v1/admin/auth/login:
+    post:
+      summary: Login Admins
+      description: authenticate users into the system
+      tags:
+        - Admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: String
+                  example: testUsername@gmail.com
+                password:
+                  type: String
+                  example: AveryStrongPassword
+      responses:
+        200:
+          description: User signed in successfully
+        401:
+          description: You have to verify your account
+        403:
+          description: Ensure you enter the right credentials
+        404:
+          description: Ensure you enter the right credentials'
+        500:
+          description: Something went wrong, please try again or check back for a fix
+  
+  /api/v1/driver/auth/login:
+    post:
+      summary: Login Drivers
+      description: authenticate drivers into the system
+      tags:
+        - Driver
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: String
+                  example: testUsername@gmail.com
+                password:
+                  type: String
+                  example: AveryStrongPassword
+      responses:
+        200:
+          description: Driver signed in successfully
+        401:
+          description: Your account hasn't been verified yet!
+        403:
+          description: Ensure you enter the right credentials
+        404:
+          description: Ensure you enter the right credentials'
+        500:
+          description: Something went wrong, please try again or check back for a fix
+  
+  /api/v1/auth/forgot-password:
+    post:
+      summary: Password Recovery Request
+      description: sends users a password reset link via emails
+      tags:
+        - Users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: String
+                  example: testUsername@gmail.com
+      responses:
+        200:
+          description: A password reset link has been sent to ${email}
+          content:
+            $ref: "#/components/responses/SuccessResponse"
+        404:
+          description: Sorry an Account with Email ${email} doesn't exist
+          content:
+            $ref: "#/components/errors/properties/customError"
+        500:
+          $ref: '#/components/errors/properties/internalServerError'
+                    
+  /api/v1/auth/reset-password?token={token}:
+    patch:
+      summary: Resets password
+      tags:
+        - Users
+      parameters:
+        - in: query
+          name: token
+          description: The token generated for resetting password with payload
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: String
+                  example: AveryStrongPassword
+      responses:
+        200:
+          description: Password updated successfully. You may login
+          content:
+            $ref: "#/components/responses/SuccessResponse"
+        404:
+          description: Password reset token is invalid or has expired.
+          content:
+            $ref: "#/components/errors/properties/customError"
+        500:
+          $ref: '#/components/errors/properties/internalServerError'
+
+  /api/v1/auth/update-password:
+    post:
+      summary: Changes password by already logged-in users
+      tags:
+        - Users
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          $ref: "#/components/parameters/bearerToken"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                oldPassword:
+                  type: String
+                  example: AveryStrongPassword  
+                newPassword:
+                  type: String
+                  example: AveryStrongPassword
+                confirmPassword:
+                  type: String
+                  example: AveryStrongPassword       
+      responses:
+        200:
+          description: Password update was successful
+          content:
+            $ref: "#/components/responses/SuccessResponse"
+        401:
+          description: Make sure you're logged in
+          content:
+            $ref: "#/components/errors/properties/customError"
+        403:
+          description: Ensure you enter the right credentials
+          content:
+            $ref: "#/components/errors/properties/customError"
+        500:
+          $ref: '#/components/errors/properties/internalServerError'
+  /api/v1/admin/auth/users:
+    get:
+      summary: Gets all users on the platform
+      tags:
+        - Admin
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          $ref: "#/components/parameters/bearerToken"
+      responses:
+        200:
+          description: 7 Users found
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                  - totalPages
+                  - currentPage
+                properties:
+                  status:
+                    type: string
+                  message: 
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/User"
+                  totalPages:
+                    type: number
+                  currentPage:
+                    type: number
+        412:
+          description: Access denied!! Missing authorization credentials
+          content:
+            $ref: "#/components/errors/properties/customError"
+        401:
+          description: You must be logged in..
+          content:
+            $ref: "#/components/errors/properties/customError"
+        404:
+          description: No records found.
+          content:
+            $ref: "#/components/errors/properties/customError"
+        500:
+          $ref: '#/components/errors/properties/internalServerError'
+
+  /api/v1/admin/drivers:
+    get:
+      summary: Gets all drivers on the platform
+      tags:
+        - Admin
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          $ref: "#/components/parameters/bearerToken"
+      responses:
+        200:
+          description: 7 Drivers found
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                  - totalPages
+                  - currentPage
+                properties:
+                  status:
+                    type: string
+                  message: 
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Driver"
+                  totalPages:
+                    type: number
+                  currentPage:
+                    type: number
+        412:
+          description: Access denied!! Missing authorization credentials
+          content:
+            $ref: "#/components/errors/properties/customError"
+        401:
+          description: You must be logged in..
+          content:
+            $ref: "#/components/errors/properties/customError"
+        404:
+          description: No driverss found.
+          content:
+            $ref: "#/components/errors/properties/customError"
+        500:
+          $ref: '#/components/errors/properties/internalServerError'
+
+  /api/v1/admin/drivers/{driverId}:
+    get:
+      summary: Gets a driver 
+      tags:
+        - Admin
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          $ref: "#/components/parameters/userId"
+        - in: path
+          $ref: "#/components/parameters/bearerToken"
+      responses:
+        200:
+          description: Driver details found
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                  message: 
+                    type: string
+                  data:
+                    type: object
+                    $ref: "#/components/schemas/Driver"
+        412:
+          description: Access denied!! Missing authorization credentials
+          content:
+            $ref: "#/components/errors/properties/customError"
+        422:
+          $ref: "#/components/errors/properties/customError"
+        401:
+          description: You must be logged in..
+          content:
+            $ref: "#/components/errors/properties/customError"
+        404:
+          description: Driver not found or has been deleted
+          content:
+            $ref: "#/components/errors/properties/customError"
+        500:
+          $ref: '#/components/errors/properties/internalServerError'
+
+    delete:
+      summary: Deletes a driver account
+      tags:
+        - Admin
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          $ref: "#/components/parameters/userId"
+        - in: path
+          $ref: "#/components/parameters/bearerToken"
+      responses:
+        200:
+          description: Driver deleted successfully 
+          content:
+            $ref: "#/components/responses/SuccessResponse"
+        412:
+          description: Access denied!! Missing authorization credentials
+          content:
+            $ref: "#/components/errors/properties/customError"
+        422:
+          $ref: "#/components/errors/properties/customError"
+        401:
+          description: You must be logged in..
+          content:
+            $ref: "#/components/errors/properties/customError"
+        404:
+          description: Driver has already been deleted
+          content:
+            $ref: "#/components/errors/properties/customError"
+        500:
+          $ref: '#/components/errors/properties/internalServerError'
+
+    put:
+      summary: Edit Driver Account
+      tags:
+        - Admin
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          $ref: "#/components/parameters/bearerToken"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone_number:
+                  type: String
+                  example: "09070822819"
+                  format: Country-Code
+                first_name:
+                  type: string
+                  example: Korir
+                last_name:
+                  type: string
+                  example: Nicanor
+      responses:
+        200:
+          description: Driver updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message
+                properties:
+                  message:
+                    type: string
+                    example: Driver updated successfully
+                  data:
+                    type: object
+                    $ref: "#/components/schemas/Driver"
+        412:
+          description: Access denied!! Missing authorization credentials
+          content:
+            $ref: "#/components/errors/properties/customError"
+        401:
+          description: You must be logged in..
+          content:
+            $ref: "#/components/errors/properties/customError"
+        500:
+          $ref: '#/components/errors/properties/internalServerError'
+
+  /api/v1/admin/drivers/verify/{driverId}:
+    put:
+      summary: Verify/Approve driver application
+      tags:
+        - Admin
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          $ref: "#/components/parameters/bearerToken"
+      responses:
+        200:
+          description: Driver verified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message
+                properties:
+                  message:
+                    type: string
+                    example: Driver verified successfully
+                  data:
+                    type: object
+                    $ref: "#/components/schemas/Driver"
+        404:
+          description: Driver does not exist
+        409:
+          description: Driver has already been verified and approved
+        412:
+          description: Access denied!! Missing authorization credentials
+          content:
+            $ref: "#/components/errors/properties/customError"
+        401:
+          description: You must be logged in..
+          content:
+            $ref: "#/components/errors/properties/customError"
+        500:
+          $ref: '#/components/errors/properties/internalServerError'
+
+  /api/v1/admin/users/{userId}:
+    get:
+      summary: Gets a user 
+      tags:
+        - Admin
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          $ref: "#/components/parameters/userId"
+        - in: path
+          $ref: "#/components/parameters/bearerToken"
+      responses:
+        200:
+          description: User found 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                  message: 
+                    type: string
+                  data:
+                    type: object
+                    $ref: "#/components/schemas/User"
+        412:
+          description: Access denied!! Missing authorization credentials
+          content:
+            $ref: "#/components/errors/properties/customError"
+        422:
+          $ref: "#/components/errors/properties/customError"
+        401:
+          description: You must be logged in..
+          content:
+            $ref: "#/components/errors/properties/customError"
+        404:
+          description: User with the ID ${userId} doesn't exist or has been deleted.
+          content:
+            $ref: "#/components/errors/properties/customError"
+        500:
+          $ref: '#/components/errors/properties/internalServerError'
+
+    delete:
+      summary: Deletes a user account
+      tags:
+        - Admin
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          $ref: "#/components/parameters/userId"
+        - in: path
+          $ref: "#/components/parameters/bearerToken"
+      responses:
+        200:
+          description: Account deleted successfully 
+          content:
+            $ref: "#/components/responses/SuccessResponse"
+        412:
+          description: Access denied!! Missing authorization credentials
+          content:
+            $ref: "#/components/errors/properties/customError"
+        422:
+          $ref: "#/components/errors/properties/customError"
+        401:
+          description: You must be logged in..
+          content:
+            $ref: "#/components/errors/properties/customError"
+        404:
+          description: User does not exist or has been deleted
+          content:
+            $ref: "#/components/errors/properties/customError"
+        500:
+          $ref: '#/components/errors/properties/internalServerError'
+
+  /api/v1/auth/user/update:
+    patch:
+      summary: Update User Account/profile
+      tags:
+        - Users
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          $ref: "#/components/parameters/bearerToken"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone_number:
+                  type: String
+                  example: "+2349070822819"
+                  format: Country-Code
+                first_name:
+                  type: string
+                  example: Korir
+                last_name:
+                  type: string
+                  example: Nicanor
+      responses:
+        200:
+          description: Your profile has been updated successfully 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message
+                properties:
+                  message:
+                    type: string
+                    example: Your profile has been updated successfully
+                  data:
+                    type: object
+                    $ref: "#/components/schemas/User"
+        412:
+          description: Access denied!! Missing authorization credentials
+          content:
+            $ref: "#/components/errors/properties/customError"
+        401:
+          description: You must be logged in..
+          content:
+            $ref: "#/components/errors/properties/customError"
+        500:
+          $ref: '#/components/errors/properties/internalServerError'
+
+  /api/v1/admin/users/search?queryString=name:
+    get:
+      summary: Searches for users by their names
+      tags:
+        - Admin
+      security:
+        - Bearer: []
+      parameters:
+        - in: query
+          name: queryString
+          description: name of registered users
+          required: true
+          schema:
+            type: string
+        - in: path
+          $ref: "#/components/parameters/bearerToken"
+      responses:
+        200:
+          description: 7 Users found
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message
+                  - data
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/User"
+        404:
+          description: User does not exist
+          content:
+            $ref: "#/components/errors/properties/notFoundError"
+        412:
+          description: Access denied!! Missing authorization credentials
+          content:
+            $ref: "#/components/errors/properties/MissingAuthError"
+        401:
+          description: You must be logged in..
+          content:
+            $ref: "#/components/errors/properties/authLoginError"
+        500:
+          $ref: '#/components/errors/properties/internalServerError'
+
+  /api/v1/admin/users/:userId:
+    patch:
+      summary: Edits A User Account/profile
+      tags:
+        - Admin
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          $ref: "#/components/parameters/userId"
+        - in: path
+          $ref: "#/components/parameters/bearerToken"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone_number:
+                  type: String
+                  example: "+2349070822819"
+                  format: Country-Code
+                first_name:
+                  type: string
+                  example: Korir
+                last_name:
+                  type: string
+                  example: Nicanor
+      responses:
+        200:
+          description: User profile has been updated successfully 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message
+                properties:
+                  message:
+                    type: string
+                    example: User profile has been updated successfully
+                  data:
+                    type: object
+                    $ref: "#/components/schemas/User"
+        412:
+          description: Access denied!! Missing authorization credentials
+          content:
+            $ref: "#/components/errors/properties/customError"
+        401:
+          description: You must be logged in..
+          content:
+            $ref: "#/components/errors/properties/customError"
+        500:
+          $ref: '#/components/errors/properties/internalServerError'
+
