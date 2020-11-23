@@ -1,5 +1,2 @@
-# Maerketplace
+# Marketplace
 
-
-
-Copyright (c) 2020 upbaseng
